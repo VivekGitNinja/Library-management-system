@@ -1,38 +1,40 @@
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.library.exception.ErrorHandling;
+import com.library.exception.InvalidInputException;
+import com.library.exception.UserNotFoundException;
+import com.library.model.User;
+import com.library.service.UserService;
+import com.library.service.impl.UserServiceImpl;
+
 import java.util.List;
-import java.util.Map;
 
 public class StudentRepository {
-    private final Map<String, Student> students = new HashMap<>();
+    private final UserService userService = new UserServiceImpl();
 
     public void addStudent(Student student) throws ErrorHandling.InvalidInputException {
-        if (student == null || student.getId() == null || student.getId().trim().isEmpty()) {
-            throw new ErrorHandling.InvalidInputException("Student ID cannot be empty.");
+        try {
+            userService.registerUser(student, "student123");
+        } catch (InvalidInputException e) {
+            throw new ErrorHandling.InvalidInputException(e.getMessage());
+        } catch (Exception e) {
+            throw new ErrorHandling.InvalidInputException("Database error: " + e.getMessage());
         }
-        if (students.containsKey(student.getId())) {
-            throw new ErrorHandling.InvalidInputException("Student with ID '" + student.getId() + "' already exists.");
-        }
-        students.put(student.getId(), student);
     }
 
-    public Student getStudentById(String id) throws ErrorHandling.StudentNotFoundException {
-        Student student = students.get(id);
-        if (student == null) {
+    public User getStudentById(String id) throws ErrorHandling.StudentNotFoundException {
+        try {
+            return userService.getUserByCode(id);
+        } catch (UserNotFoundException e) {
+            throw new ErrorHandling.StudentNotFoundException(id);
+        } catch (Exception e) {
             throw new ErrorHandling.StudentNotFoundException(id);
         }
-        return student;
     }
 
-    public List<Student> getAllStudents() {
-        return new ArrayList<>(students.values());
-    }
-
-    public boolean removeStudent(String id) throws ErrorHandling.StudentNotFoundException {
-        if (!students.containsKey(id)) {
-            throw new ErrorHandling.StudentNotFoundException(id);
+    public List<User> getAllStudents() {
+        try {
+            return userService.getAllUsers();
+        } catch (Exception e) {
+            return List.of();
         }
-        students.remove(id);
-        return true;
     }
 }

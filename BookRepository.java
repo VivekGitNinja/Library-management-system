@@ -1,59 +1,56 @@
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.library.exception.BookNotFoundException;
+import com.library.exception.ErrorHandling;
+import com.library.exception.InvalidInputException;
+import com.library.model.Book;
+import com.library.service.BookService;
+import com.library.service.impl.BookServiceImpl;
+
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class BookRepository {
-    private final Map<String, Book> books = new HashMap<>();
+    private final BookService bookService = new BookServiceImpl();
 
     public void addBook(Book book) throws ErrorHandling.InvalidInputException {
-        if (book == null || book.getId() == null || book.getId().trim().isEmpty()) {
-            throw new ErrorHandling.InvalidInputException("Book ID cannot be empty.");
+        try {
+            bookService.addBook(book);
+        } catch (InvalidInputException e) {
+            throw new ErrorHandling.InvalidInputException(e.getMessage());
+        } catch (Exception e) {
+            throw new ErrorHandling.InvalidInputException("Database error: " + e.getMessage());
         }
-        if (books.containsKey(book.getId())) {
-            throw new ErrorHandling.InvalidInputException("Book with ID '" + book.getId() + "' already exists.");
-        }
-        books.put(book.getId(), book);
     }
 
     public Book getBookById(String id) throws ErrorHandling.BookNotFoundException {
-        Book book = books.get(id);
-        if (book == null) {
+        try {
+            return bookService.getBookByCode(id);
+        } catch (BookNotFoundException e) {
+            throw new ErrorHandling.BookNotFoundException(id);
+        } catch (Exception e) {
             throw new ErrorHandling.BookNotFoundException(id);
         }
-        return book;
     }
 
     public List<Book> getAllBooks() {
-        return new ArrayList<>(books.values());
+        try {
+            return bookService.getAllBooks();
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public List<Book> searchByTitle(String keyword) {
-        String lower = keyword.toLowerCase();
-        return books.values().stream()
-                .filter(b -> b.getTitle().toLowerCase().contains(lower))
-                .collect(Collectors.toList());
-    }
-
-    public List<Book> searchByAuthor(String author) {
-        String lower = author.toLowerCase();
-        return books.values().stream()
-                .filter(b -> b.getAuthor().toLowerCase().contains(lower))
-                .collect(Collectors.toList());
+        try {
+            return bookService.searchBooksByTitle(keyword);
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public List<Book> getAvailableBooks() {
-        return books.values().stream()
-                .filter(Book::isAvailable)
-                .collect(Collectors.toList());
-    }
-
-    public boolean removeBook(String id) throws ErrorHandling.BookNotFoundException {
-        if (!books.containsKey(id)) {
-            throw new ErrorHandling.BookNotFoundException(id);
+        try {
+            return bookService.getAvailableBooks();
+        } catch (Exception e) {
+            return List.of();
         }
-        books.remove(id);
-        return true;
     }
 }

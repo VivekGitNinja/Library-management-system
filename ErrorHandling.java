@@ -1,31 +1,33 @@
+package com.library.exception;
+
 public class ErrorHandling {
-    public static class LibraryException extends Exception {
+    public static class LibraryException extends com.library.exception.LibraryException {
         public LibraryException(String message) {
             super(message);
         }
     }
 
-    public static class BookNotFoundException extends LibraryException {
+    public static class BookNotFoundException extends com.library.exception.BookNotFoundException {
         public BookNotFoundException(String bookId) {
-            super("Error: Book with ID '" + bookId + "' was not found.");
+            super(bookId);
         }
     }
 
-    public static class StudentNotFoundException extends LibraryException {
+    public static class StudentNotFoundException extends com.library.exception.UserNotFoundException {
         public StudentNotFoundException(String studentId) {
-            super("Error: Student with ID '" + studentId + "' was not found.");
+            super(studentId);
         }
     }
 
-    public static class BookAlreadyBorrowedException extends LibraryException {
+    public static class BookAlreadyBorrowedException extends com.library.exception.BookAlreadyBorrowedException {
         public BookAlreadyBorrowedException(String title) {
-            super("Error: Book '" + title + "' is currently already borrowed.");
+            super(title);
         }
     }
 
-    public static class InvalidInputException extends LibraryException {
+    public static class InvalidInputException extends com.library.exception.InvalidInputException {
         public InvalidInputException(String message) {
-            super("Invalid Input: " + message);
+            super(message);
         }
     }
 }
